@@ -1,0 +1,23 @@
+name: Notify Slack on New Issue
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send notification to Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_USER: ${{ github.event.issue.user.login }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data "{
+            \"text\": \"🆕 New Issue Opened by *${ISSUE_USER}*\n*Title:* ${ISSUE_TITLE}\n*URL:* ${ISSUE_URL}\n*Body:* ${ISSUE_BODY}\"
+          }" \
+          $SLACK_WEBHOOK_URL
